@@ -41,7 +41,11 @@
        "\\|"
        (iec61131-regex-startswith
 	'("FUNCTION_BLOCK" "PROGRAM" "CONFIGURATION" "VAR"
-	  "VAR_INPUT" "VAR_OUTPUT"))))
+	  "VAR_INPUT" "VAR_OUTPUT"))
+       "\\|"
+       ".*:$"
+       ))
+
 
 (defvar iec61131-indent-regex-1 nil "Regex for indentation decrement.")
 (setq iec61131-indent-regex-1
@@ -143,15 +147,16 @@
 	    (cond
 	     ;; Beginning of the buffer => no indentation
 	     ((bobp) 0)
-	     ;; current line is deindentation
-	     ((looking-at-p iec61131-indent-regex-1)
-	      (forward-line -1) ;; do not understand this
-	      (- (current-indentation) tab-width))
 	     (t
-	      (forward-line -1)
-	      (if (looking-at-p iec61131-indent-regex+1)
-		  (+ (current-indentation) tab-width)
-		(current-indentation))))))
+              (forward-line 0)
+              (cond ((looking-at-p iec61131-indent-regex-1)
+                     (forward-line -1)
+                     (max 0 (- (current-indentation) tab-width)))
+                    (t
+                     (forward-line -1)
+                     (if (looking-at-p iec61131-indent-regex+1)
+                         (+ (current-indentation) tab-width)
+                       (current-indentation))))))))
     (indent-line-to cur-indent)))
 
 (defvar iec61131-mode-syntax-table nil
